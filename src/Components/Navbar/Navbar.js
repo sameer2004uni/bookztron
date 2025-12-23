@@ -62,7 +62,7 @@ function Navbar() {
         dispatchUserOrders({type:"UPDATE_USER_ORDERS",payload:[]})
         setUserLoggedIn(false)
         localStorage.clear()
-        showToast("success","","Logged out successfully")
+        showToast("success", "Logout Successful", "You have been logged out successfully.")
     }
     
     return (

@@ -12,6 +12,8 @@ import {
 import Lottie from 'react-lottie';
 import CartLottie from "../../Assets/Icons/cart.json"
 
+const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 function Cart()
 {
     const { userWishlist, dispatchUserWishlist } = useWishlist()
@@ -41,19 +43,26 @@ function Cart()
                 {
                     (async function getUpdatedWishlistAndCart()
                     {
-                        let updatedUserInfo = await axios.get(
-                        "https://bookztron-server.vercel.app/api/user",
-                        {
-                            headers:
-                            {
-                            'x-access-token': localStorage.getItem('token'),
-                            }
-                        })
+                        try {
+                            let updatedUserInfo = await axios.get(
+                                `${BASE_URL}/api/user`,
+                                {
+                                    headers:
+                                    {
+                                    'x-access-token': localStorage.getItem('token'),
+                                    }
+                                })
 
-                        if(updatedUserInfo.data.status==="ok")
-                        {
-                            dispatchUserWishlist({type: "UPDATE_USER_WISHLIST",payload: updatedUserInfo.data.user.wishlist})
-                            dispatchUserCart({type: "UPDATE_USER_CART",payload: updatedUserInfo.data.user.cart})
+                            if (updatedUserInfo.data.status === 'ok') {
+                                dispatchUserWishlist({type: "UPDATE_USER_WISHLIST",payload: updatedUserInfo.data.user.wishlist})
+                                dispatchUserCart({type: "UPDATE_USER_CART",payload: updatedUserInfo.data.user.cart})
+                            } else {
+                                console.error('Failed to fetch user data:', updatedUserInfo.data.message);
+                                alert(`Error: ${updatedUserInfo.data.message}`);
+                            }
+                        } catch (error) {
+                            console.error('Error fetching user data:', error);
+                            alert(`Error: ${error.message}`);
                         }
                     })()
                 }
@@ -90,7 +99,33 @@ function Cart()
                         <div className="cart-items-grid">
                             {
                                 userCart.map( (productDetails, index)=>    
-                                    <HorizontalProductCard key={index} productDetails={productDetails}/>
+                                    <div key={index} className="cart-item-container">
+                                        <HorizontalProductCard productDetails={productDetails}/>
+                                        <button 
+                                            onClick={async () => {
+                                                const token = localStorage.getItem('token');
+                                                if (token) {
+                                                    await axios.delete(
+                                                        `${BASE_URL}/api/cart/${productDetails._id}`,
+                                                        {
+                                                            headers: {
+                                                                'x-access-token': token
+                                                            }
+                                                        }
+                                                    ).then((response) => {
+                                                        if (response.data.status === 'ok') {
+                                                            dispatchUserCart({
+                                                                type: "UPDATE_USER_CART",
+                                                                payload: response.data.cart
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                            }}
+                                            className="solid-danger-btn">
+                                            Remove from Cart
+                                        </button>
+                                    </div>
                                 )
                             }
                         </div>

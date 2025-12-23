@@ -5,6 +5,8 @@ import { useCart, useToast, useOrders } from "../../index"
 import axios from "axios"
 import { loadRazorpayScript } from "../../UtilityFunctions/loadRazorpayScript"
 
+const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 function ShoppingBill()
 {
     const navigate = useNavigate()
@@ -14,10 +16,14 @@ function ShoppingBill()
     let totalDiscount = 0, totalBill = 0, finalBill = 0;
     const [ couponName, setCouponName ] = useState("")
 
-    userCart.forEach(product=>{
-        let discountOnCurrentProduct = ( (product.originalPrice - product.discountedPrice) * product.quantity )
-        totalDiscount = totalDiscount + discountOnCurrentProduct
-        totalBill = totalBill + ( product.discountedPrice * product.quantity )
+    userCart.forEach(product => {
+        const originalPrice = product.originalPrice || 0;
+        const discountedPrice = product.discountedPrice || 0;
+        const quantity = product.quantity || 1;
+
+        let discountOnCurrentProduct = ((originalPrice - discountedPrice) * quantity);
+        totalDiscount = totalDiscount + discountOnCurrentProduct;
+        totalBill = totalBill + (discountedPrice * quantity);
     })
 
     if(couponName==="BOOKS200")
@@ -31,68 +37,119 @@ function ShoppingBill()
 
     async function displayRazorPay()
     {
-        const res = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js")
+        const res = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js");
 
-        if(!res)
-        {
-            showToast("error","","Razorpay SDK failed to load, kindly check internet connection!")
+        if (!res) {
+            console.error("Razorpay SDK failed to load");
+            showToast("error", "", "Razorpay SDK failed to load, kindly check internet connection!");
             return;
         }
 
-        let finalBillAmount = (finalBill*100).toString()
+        let finalBillAmount = (finalBill * 100).toString();
 
-        const dataResponse = await axios.post(
-            "https://bookztron-server.vercel.app/api/razorpay",
-            {
-                finalBillAmount
-            }
-        )
+        try {
+            const dataResponse = await axios.post(
+                `${BASE_URL}/api/razorpay`,
+                { finalBillAmount }
+            );
 
-        let data = dataResponse.data
+            console.log("Backend response:", dataResponse.data);
+            let data = dataResponse.data;
 
-        var options = {
-            "key": "rzp_test_hyc3ht0ngvqOD5", 
-            "amount": data.amount, 
-            "currency": data.currency,
-            "name": "Bookztron",
-            "description": "Thank you for shopping!",
-            "image": "https://raw.githubusercontent.com/Naman-Saxena1/Bookztron-E-Commerce_Book_Store/development/public/favicon-icon.png",
-            "order_id": data.id,
-            "handler": async function (response){
-                showToast("success","","Payment Successful! 😎")
-                showToast("success","","Order added to your bag!")
-                let newOrderItemsArray = userCart.map(orderItem=>{
-                    return {...orderItem, orderId: data.id}
-                })
-                let ordersUpdatedResponse = await axios.post(
-                    "https://bookztron-server.vercel.app/api/orders",
-                    {
-                        newOrderItemsArray
-                    },
-                    {
-                        headers : {'x-access-token': localStorage.getItem('token')}
+            const options = {
+                key: "rzp_test_RhzO07LQhC4Twd", // Updated to match .env credentials
+                amount: data.amount,
+                currency: data.currency,
+                name: "Bookztron",
+                description: "Thank you for shopping!",
+                image: "https://raw.githubusercontent.com/Naman-Saxena1/Bookztron-E-Commerce_Book_Store/development/public/favicon-icon.png",
+                order_id: data.id,
+                handler: async function (response) {
+                    console.log("Payment response:", response);
+                    showToast("success", "", "Payment Successful! 😎");
+                    showToast("success", "", "Order added to your bag!");
+
+                    let newOrderItemsArray = userCart.map(orderItem => {
+                        return { ...orderItem, orderId: data.id };
+                    });
+
+                    let ordersUpdatedResponse = await axios.post(
+                        `${BASE_URL}/api/orders`,
+                        { newOrderItemsArray },
+                        { headers: { 'x-access-token': localStorage.getItem('token') } }
+                    );
+
+                    let emptyCartResponse = await axios.patch(
+                        `${BASE_URL}/api/cart/empty/all`,
+                        {},
+                        { headers: { 'x-access-token': localStorage.getItem('token') } }
+                    );
+
+                    if (emptyCartResponse.data.status === 'ok') {
+                        dispatchUserCart({ type: "UPDATE_USER_CART", payload: [] });
                     }
-                )
-                let emptyCartResponse = await axios.patch(
-                    "https://bookztron-server.vercel.app/api/cart/empty/all",
-                    {},
-                    {
-                        headers : {'x-access-token': localStorage.getItem('token')}
+
+                    if (ordersUpdatedResponse.data.status === 'ok') {
+                        dispatchUserOrders({ type: "UPDATE_USER_ORDERS", payload: ordersUpdatedResponse.data.user.orders });
+                        navigate('/orders');
                     }
-                )
-                if(emptyCartResponse.data.status==='ok')
-                {
-                    dispatchUserCart({type: "UPDATE_USER_CART",payload: []})
+                },
+                prefill: {
+                    name: "Your Name",
+                    email: "your.email@example.com",
+                    contact: "9999999999"
+                },
+                theme: {
+                    color: "#3399cc"
                 }
-                if(ordersUpdatedResponse.data.status==='ok')
-                {
-                    dispatchUserOrders({type: "UPDATE_USER_ORDERS",payload: ordersUpdatedResponse.data.user.orders})
-                    navigate('/orders')
-                }
+            };
+
+            var paymentObject = new window.Razorpay(options);
+            paymentObject.open();
+        } catch (error) {
+            console.error("Error in displayRazorPay:", error);
+            showToast("error", "", "Oops! Something went wrong. Error in opening checkout");
+        }
+    }
+
+    function TestRazorpayButton() {
+        async function testRazorpayCheckout() {
+            const res = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js");
+
+            if (!res) {
+                console.error("Razorpay SDK failed to load");
+                return;
             }
-        };
-        var paymentObject = new window.Razorpay(options);
-        paymentObject.open();
+
+            const options = {
+                key: "rzp_test_RhzO07LQhC4Twd", // Updated to match .env credentials
+                amount: 100,
+                currency: "INR",
+                name: "Test Checkout",
+                description: "Testing Razorpay Checkout",
+                order_id: "order_Rv0AICN7Vr3esf",
+                handler: function (response) {
+                    console.log("Payment response:", response);
+                },
+                prefill: {
+                    name: "Test User",
+                    email: "test.user@example.com",
+                    contact: "9999999999"
+                },
+                theme: {
+                    color: "#3399cc"
+                }
+            };
+
+            var paymentObject = new window.Razorpay(options);
+            paymentObject.open();
+        }
+
+        return (
+            <button onClick={testRazorpayCheckout} className="test-razorpay-btn">
+                Test Razorpay Checkout
+            </button>
+        );
     }
 
     return (
@@ -101,7 +158,9 @@ function ShoppingBill()
 
             <hr></hr>
             {
-                userCart.map(product=>{
+                userCart.map(product => {
+                    const discountedPrice = product.discountedPrice || 0;
+                    const quantity = product.quantity || 1;
 
                     return (
                         <div key={product._id} className="cart-price-container">
@@ -109,13 +168,13 @@ function ShoppingBill()
                                 <p>{product.bookName}</p>
                             </div>
                             <div className="cart-item-quantity">
-                                <p>X {product.quantity}</p>
+                                <p>X {quantity}</p>
                             </div>
                             <div className="cart-item-total-price" id="price-sum">
-                                <p>&#8377;{product.discountedPrice * product.quantity}</p>
+                                <p>&#8377;{discountedPrice * quantity}</p>
                             </div>
                         </div>
-                    )
+                    );
                 })
             }
             
@@ -167,6 +226,8 @@ function ShoppingBill()
             >
                 Place Order
             </button>
+
+            <TestRazorpayButton />
         </div>
     )
 }

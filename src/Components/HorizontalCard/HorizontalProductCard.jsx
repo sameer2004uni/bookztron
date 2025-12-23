@@ -28,7 +28,13 @@ function HorizontalProductCard({productDetails})
     } = productDetails;
     const productdetails = productDetails;
 
-    const [productQuantity, setProductQuantity] = useState(Number(quantity))
+    const [productQuantity, setProductQuantity] = useState(Number(quantity) || 1);
+
+    useEffect(() => {
+        if (isNaN(productQuantity)) {
+            setProductQuantity(1); // Fallback to 1 if quantity is invalid
+        }
+    }, [productQuantity])
 
     useEffect(()=>{
         (async function onQuantityChange()

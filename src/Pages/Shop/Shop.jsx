@@ -13,6 +13,8 @@ import {
 import { useProductAvailable } from "../../Context/product-context"
 import axios from 'axios'
 
+const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 function Shop(props) {
 
     let { 
@@ -55,7 +57,7 @@ function Shop(props) {
         //Redo api call to get data
         try {
           (async () => {
-            const productsAvailableData = await axios.get('https://bookztron-server.vercel.app/api/home/products')
+            const productsAvailableData = await axios.get(`${BASE_URL}/api/home/products`)
             dispatchSortedProductsList({type:"ADD_ITEMS_TO_PRODUCTS_AVAILABLE_LIST", payload: [...productsAvailableData.data.productsList] })
           }) ()
         }
@@ -80,12 +82,12 @@ function Shop(props) {
           (async function getUpdatedWishlistAndCart()
           {
             let updatedUserInfo = await axios.get(
-            "https://bookztron-server.vercel.app/api/user",
+            `${BASE_URL}/api/user`,
             {
-              headers:
-              {
+                headers:
+                {
                 'x-access-token': localStorage.getItem('token'),
-              }
+                }
             })
 
             if(updatedUserInfo.data.status==="ok")

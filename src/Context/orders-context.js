@@ -1,4 +1,5 @@
 import { useReducer, createContext, useContext } from "react"
+import axios from 'axios';
 
 const OrdersContext = createContext()
 
@@ -23,6 +24,25 @@ const OrdersContextProvider = ({children}) => {
     )
 }
 
+const fetchAndUpdateOrders = async (dispatchUserOrders) => {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('/api/orders', {
+            headers: {
+                'x-access-token': token,
+            },
+        });
+
+        if (response.data.status === 'ok') {
+            dispatchUserOrders({ type: 'UPDATE_USER_ORDERS', payload: response.data.user.orders });
+        } else {
+            console.error('Failed to fetch orders:', response.data.message);
+        }
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+    }
+};
+
 let useOrders = () => useContext(OrdersContext)
 
-export { useOrders, OrdersContextProvider }
+export { useOrders, OrdersContextProvider, fetchAndUpdateOrders };

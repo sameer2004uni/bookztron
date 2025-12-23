@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom"
 import axios from "axios"
 import { useToast } from "../../Context/toast-context"
 
+const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 function Signup()
 {
     const { showToast } = useToast()
@@ -19,11 +21,11 @@ function Signup()
     {
         event.preventDefault();
         axios.post(
-            "https://bookztron-server.vercel.app/api/signup",
+            `${BASE_URL}/api/signup`,
             {
-                newUserName: `${newUserName}`,
-                newUserEmail: `${newUserEmail}`,
-                newUserPassword : `${newUserPassword}`
+                name: newUserName,
+                email: newUserEmail,
+                password: newUserPassword
             }
         )
         .then(res => {

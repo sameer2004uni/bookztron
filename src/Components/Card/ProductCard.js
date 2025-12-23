@@ -58,7 +58,7 @@ export default function ProductCard({ productdetails })
                 if(!user)
                 {
                     localStorage.removeItem('token')
-                    showToast("warning","","Kindly Login")
+                    showToast("warning", "Login Required", "Please log in to continue.")
                     navigate('/login')
                 }
                 else
@@ -87,7 +87,7 @@ export default function ProductCard({ productdetails })
             }
             else
             {
-                showToast("warning","","Kindly Login")
+                showToast("warning", "Login Required", "Please log in to continue.")
             }   
         }
         else
@@ -102,7 +102,7 @@ export default function ProductCard({ productdetails })
                 if(!user)
                 {
                     localStorage.removeItem('token')
-                    showToast("warning","","Kindly Login")
+                    showToast("warning", "Login Required", "Please log in to continue.")
                     navigate('/login')
                 }
                 else
@@ -130,7 +130,7 @@ export default function ProductCard({ productdetails })
             }
             else
             {
-                showToast("warning","","Kindly Login")
+                showToast("warning", "Login Required", "Please log in to continue.")
             }   
         }    
     }

@@ -15,6 +15,8 @@ import {
 import { useProductAvailable } from "../../Context/product-context"
 import { useGenre } from "../../Context/genre-context"
 
+const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 function Home() {
   const { dispatchProductFilterOptions } = useProductAvailable()
   const { dispatchUserWishlist } = useWishlist()
@@ -49,7 +51,7 @@ function Home() {
               (async function getUpdatedWishlistAndCart()
               {
                   let updatedUserInfo = await axios.get(
-                  "https://bookztron-server.vercel.app/api/user",
+                  `${BASE_URL}/api/user`,
                   {
                       headers:
                       {

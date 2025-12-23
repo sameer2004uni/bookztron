@@ -12,6 +12,8 @@ import {
 import Lottie from 'react-lottie';
 import GuyWithBookLottie from "../../Assets/Icons/guy_with_book.json"
 
+const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 function Orders()
 {
     const { userWishlist, dispatchUserWishlist } = useWishlist()
@@ -48,7 +50,7 @@ function Orders()
                     (async function getUpdatedWishlistAndCart()
                     {
                         let updatedUserInfo = await axios.get(
-                        "https://bookztron-server.vercel.app/api/user",
+                        `${BASE_URL}/api/user`,
                         {
                             headers:
                             {

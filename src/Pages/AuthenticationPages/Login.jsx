@@ -11,6 +11,8 @@ import {
     useOrders
 } from "../../index"
 
+const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 function Login()
 {
     const { setUserLoggedIn }       = useUserLogin()
@@ -38,7 +40,7 @@ function Login()
                 (async function getUpdatedWishlistAndCart()
                 {
                     let updatedUserInfo = await axios.get(
-                    "https://bookztron-backend.vercel.app/api/user",
+                    `${BASE_URL}/api/user`,
                     {
                         headers:
                         {
@@ -64,7 +66,7 @@ function Login()
         event.preventDefault();
         try {
             const res = await axios.post(
-                "https://bookztron-backend.vercel.app/api/send-otp",
+                `${BASE_URL}/api/send-otp`,
                 { userEmail }
             )
             if(res.data.status === "ok") {
@@ -83,7 +85,7 @@ function Login()
         event.preventDefault();
         try {
             const res = await axios.post(
-                "https://bookztron-backend.vercel.app/api/verify-otp",
+                `${BASE_URL}/api/verify-otp`,
                 { userEmail, otp }
             )
             if(res.data.user)
