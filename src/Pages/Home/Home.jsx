@@ -71,6 +71,37 @@ function Home() {
     <div className='home-component-container'>
       <div className='home-page-img-container'>
         <img className="home-page-background-img" src={LibraryIllustration} alt="Library Illustration"/>
+        <div className="home-hero-overlay">
+          <div className="home-hero-content">
+            <p className="home-hero-eyebrow">Curated for every kind of reader</p>
+            <h1 className="home-hero-title">Discover stories that stay with you.</h1>
+            <p className="home-hero-subtitle">
+              From timeless classics to trending manga and cutting‑edge tech, build a library that feels truly yours.
+            </p>
+            <div className="home-hero-cta-group">
+              <Link to={"/shop"}>
+                <button
+                  onClick={()=>{
+                    setFictionCategoryCheckbox(true)
+                    setThrillerCategoryCheckbox(true)
+                    setTechCategoryCheckbox(true)
+                    setPhilosophyCategoryCheckbox(true)
+                    setRomanceCategoryCheckbox(true)
+                    setMangaCategoryCheckbox(true)
+                    dispatchProductFilterOptions({type:"RESET_DEFAULT_FILTERS"}) }  
+                  }
+                  className="solid-primary-btn">
+                  Browse all books
+                </button>
+              </Link>
+              <Link to={"/shop"} state={{navigate: true}}>
+                <button className="solid-secondary-btn">
+                  Explore by genre
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
       <h1 className='homepage-headings'>Genres</h1>

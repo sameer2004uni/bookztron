@@ -20,7 +20,8 @@ function Login()
     const { dispatchUserOrders }    = useOrders()
 
     const [userEmail    , setUserEmail]    = useState('')
-    const [userPassword , setUserPassword] = useState('')
+    const [otp          , setOtp]          = useState('')
+    const [step         , setStep]         = useState(1) // 1: enter email, 2: enter OTP
 
     useEffect(()=>{
         const token=localStorage.getItem('token')
@@ -37,7 +38,7 @@ function Login()
                 (async function getUpdatedWishlistAndCart()
                 {
                     let updatedUserInfo = await axios.get(
-                    "https://bookztron-server.vercel.app/api/user",
+                    "https://bookztron-backend.vercel.app/api/user",
                     {
                         headers:
                         {
@@ -58,18 +59,33 @@ function Login()
 
     const navigate = useNavigate()
 
-    function loginUser(event)
+    async function sendOtp(event)
     {
         event.preventDefault();
-        axios.post(
-            "https://bookztron-server.vercel.app/api/login",
-            {
-                userEmail,
-                userPassword
+        try {
+            const res = await axios.post(
+                "https://bookztron-backend.vercel.app/api/send-otp",
+                { userEmail }
+            )
+            if(res.data.status === "ok") {
+                showToast("success", "", "OTP sent to your email")
+                setStep(2)
+            } else {
+                throw new Error("Failed to send OTP")
             }
-        )
-        .then(res => {
-            
+        } catch (err) {
+            showToast("error", "", "Error sending OTP. Please try again")
+        }
+    }
+
+    async function verifyOtp(event)
+    {
+        event.preventDefault();
+        try {
+            const res = await axios.post(
+                "https://bookztron-backend.vercel.app/api/verify-otp",
+                { userEmail, otp }
+            )
             if(res.data.user)
             {
                 localStorage.setItem('token',res.data.user)
@@ -82,18 +98,16 @@ function Login()
             }
             else
             {
-                throw new Error("Error in user login")
+                throw new Error("Invalid OTP")
             }
-
-        })
-        .catch(err=>{
-            showToast("error","","Error logging in user. Please try again")
-        })
+        } catch (err) {
+            showToast("error","","Invalid OTP. Please try again")
+        }
     }
 
     return (
         <div className="user-auth-content-container">
-            <form onSubmit={loginUser} className="user-auth-form">
+            <form onSubmit={step === 1 ? sendOtp : verifyOtp} className="user-auth-form">
                 <h2>Login</h2>
                 
                 <div className="user-auth-input-container">
@@ -105,20 +119,23 @@ function Login()
                         placeholder="Email" 
                         value={userEmail}
                         onChange={(event)=>setUserEmail(event.target.value)}
-                        required/>
+                        required
+                        disabled={step === 2}/>
                 </div>
 
-                <div className="user-auth-input-container">
-                    <label htmlFor="user-auth-input-password"><h4>Password</h4></label>
-                    <input 
-                        id="user-auth-input-password" 
-                        className="user-auth-form-input" 
-                        type="password" 
-                        placeholder="Password" 
-                        value={userPassword}
-                        onChange={(event)=>setUserPassword(event.target.value)}
-                        required/>
-                </div>
+                {step === 2 && (
+                    <div className="user-auth-input-container">
+                        <label htmlFor="user-auth-input-otp"><h4>OTP</h4></label>
+                        <input 
+                            id="user-auth-input-otp" 
+                            className="user-auth-form-input" 
+                            type="text" 
+                            placeholder="Enter OTP" 
+                            value={otp}
+                            onChange={(event)=>setOtp(event.target.value)}
+                            required/>
+                    </div>
+                )}
 
                 <div className="user-options-container">
                     <div className="remember-me-container">
@@ -132,7 +149,15 @@ function Login()
                     </div>
                 </div>
 
-                <button type="submit" className="solid-success-btn form-user-auth-submit-btn">Login</button>
+                <button type="submit" className="solid-success-btn form-user-auth-submit-btn">
+                    {step === 1 ? "Send OTP" : "Verify OTP"}
+                </button>
+
+                {step === 2 && (
+                    <button type="button" onClick={() => setStep(1)} className="solid-secondary-btn form-user-auth-submit-btn">
+                        Back
+                    </button>
+                )}
 
                 <div className="new-user-container">
                     <Link to="/signup" className="links-with-blue-underline" id="new-user-link">

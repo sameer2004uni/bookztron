@@ -9,7 +9,8 @@
     align-items: flex-start;
     grid-template-columns: repeat(3, 1fr);
     color: white;
-    background-color: var(--dark-grey-2);
+    background: radial-gradient(circle at top left, #1e293b, #020617 55%, #000000 100%);
+    box-shadow: 0 -20px 60px rgba(15, 23, 42, 0.95);
 }
 
 .footer-list
@@ -22,9 +23,11 @@
 {
     color: var(--dull-grey);
     cursor: pointer;
+    transition: color var(--transition-fast), transform var(--transition-fast);
 }
 
 .footer-list p:hover
 {
     color: white;
+    transform: translateX(2px);
 }

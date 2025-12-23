@@ -1,6 +1,6 @@
 .home-component-container
 {
-    background-color: var(--pure-white);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.02), rgba(15, 23, 42, 0.05));
 }
 
 .home-page-img-container
@@ -8,20 +8,70 @@
     position: relative;
     width: 100%;
     height: 61.4rem;
+    overflow: hidden;
 }
 
 .home-page-background-img
 {
-    height: 100%;
+    height: 120%;
     width: 100%;
     object-fit: cover;
+    filter: brightness(0.55) saturate(1.2);
+    transform: scale(1.02);
+}
+
+.home-hero-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10%;
+    pointer-events: none;
+}
+
+.home-hero-content {
+    max-width: 64rem;
+    text-align: left;
+    color: var(--pure-white);
+    pointer-events: auto;
+}
+
+.home-hero-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 1.1rem;
+    color: rgba(226, 232, 240, 0.88);
+    margin-bottom: 1rem;
+}
+
+.home-hero-title {
+    font-size: 3.4rem;
+    line-height: 1.1;
+    margin-bottom: 1.6rem;
+}
+
+.home-hero-subtitle {
+    max-width: 44rem;
+    font-size: 1.4rem;
+    color: rgba(226, 232, 240, 0.86);
+    margin-bottom: 2.4rem;
+}
+
+.home-hero-cta-group {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
 }
 
 .homepage-headings
 {
     margin-top: 6rem;
     margin-bottom: 0;
-    background-color: var(--pure-white);
+    background-color: transparent;
+    font-size: 2.2rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
 }
 
 .genre-cards-container
@@ -30,10 +80,10 @@
     padding: 4rem 9rem;
     display: grid;
     grid-template-columns: repeat(auto-fit, 19rem);
-    gap: 5px;
+    gap: 1.6rem;
     justify-content: center;
     justify-items: center;
-    background-color: var(--pure-white);
+    background-color: transparent;
 }
 
 .homepage-explore-all-btn

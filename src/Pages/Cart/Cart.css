@@ -11,6 +11,7 @@
     justify-content: flex-start;
     align-items: center;
     padding: 3rem;
+    gap: 2rem;
 }
 
 .cart-grid
@@ -21,6 +22,9 @@
     padding: 2rem;
     gap: 2rem;
     grid-template-columns: repeat( 4 , 1fr );
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
 }
 
 .cart-items-grid
@@ -39,7 +43,7 @@
     justify-content: space-between;
     padding-left: 2rem;
     margin: 0 auto;
-    border-radius: 0;
+    border-radius: var(--radius-md);
 }
 
 .outline-card-secondary-btn.card-dismiss-btn
@@ -117,8 +121,10 @@ input::-webkit-inner-spin-button {
     flex-direction: column;
     align-items: flex-start;
     color: black;
-    background-color: white;
-    border: 1px solid rgb(211, 211, 211);
+    background-color: var(--pure-white);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-card);
 }
 
 @media only screen and (max-width:1125px)
